@@ -1,0 +1,9 @@
+
+<input type="search" name="q"
+    data-hx-get="{% url 'scraping:search' %}"
+    hx-trigger="keyup changed delay:500ms"
+    hx-target="#search-results"
+    placeholder="Search..."
+    class="form-control form-control-dark text-bg-dark"
+    aria-label="Search"
+>

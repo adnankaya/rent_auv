@@ -1,0 +1,79 @@
+{% extends 'uav/base.html' %}
+{% load static %}
+
+{% block uav_body %}
+<section class="container my-5">
+    <h2 class="text-center">{{_("Renting UAV: ")}}</h2>
+
+    <div class="row">
+        <div class="col-md-9">
+            {% include "uav/components/uav-item.html" %}
+        </div>
+        <div class="col-md-3">
+            <form id="rentingForm">
+                <div class="d-grid gap-2">
+                    <button id="submit-button" type="submit" class="btn btn-primary" type="button">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        {{_("Complete Renting!")}}
+                    </button>
+                </div>
+            </form>
+            <section class="my-3">
+                <div id="result" class="alert">
+
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+<script>
+
+    const form = document.getElementById('rentingForm');
+    const resultDiv = document.getElementById('result');
+    const rentURL = "{% url 'api:routers:uav-rent'  pk=uav_id %}";
+
+    
+
+    async function postJSON(data) {
+        try {
+            const response = await fetch(rentURL, {
+                method: "POST", // or 'PUT'
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRFToken': "{{csrf_token}}",
+                },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            // If response status is not in the range 200-299
+            if (!response.ok) {
+                console.error("Error:", result);
+                resultDiv.classList.add("alert-danger");
+                resultDiv.innerHTML = `<strong>${JSON.stringify(result)}</strong>`
+                return;
+            }
+            // console.log("Success:", result);
+            resultDiv.classList.add("alert-success");
+            resultDiv.innerHTML = `<strong>
+                {% include 'spinner.html' %}
+                Successfully rented!.. Now redirecting...
+                </strong>`
+            setTimeout(() => {
+                const redirectURL = "{% url 'home:dashboard' %}";
+                window.location.replace(redirectURL);
+            }, 2000);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent default form submission
+        const payload = {
+            "uav":"{{uav_id}}"
+        }
+        postJSON(payload);
+
+    });
+</script>
+{% endblock uav_body %}

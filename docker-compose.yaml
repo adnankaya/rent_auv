@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+  web:
+    container_name: container_web_uav
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000 --settings=src.settings.dev"
+    stdin_open: true
+  
+  db:
+    image: postgres:latest
+    container_name: container_db_uav
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${DB_NAME:-dbuav}
+      POSTGRES_USER: ${POSTGRES_USER:-developer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-developer}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_volume:/data/postgres
+    tty: true
+
+  
+volumes:
+  postgres_volume:
+
+

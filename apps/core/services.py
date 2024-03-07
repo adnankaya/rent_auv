@@ -1,0 +1,5 @@
+
+
+
+class CoreService(object):
+    pass

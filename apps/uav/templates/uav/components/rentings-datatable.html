@@ -1,0 +1,324 @@
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    {% if user.is_superuser %}
+                    <h5 class="card-title bg-dark text-warning p-2 my-1 rounded">{{_("Platform Rented UAVs")}}</h5>
+                    {% else %}
+                    <h5 class="card-title">{{_("My Rented UAVs")}}</h5>
+                    {% endif %}
+                    <!-- Table with stripped rows -->
+                    <div class="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
+                        <div class="row my-3">
+                            <div class="col-4">
+                                <select id="limitPerPage" class="form-select border border-primary-subtle">
+                                    <option value="2">2</option>
+                                    <option value="4" selected>{{_("Entries Per Page (Default 4)")}}</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="-1">All</option>
+                                </select>
+                            </div>
+                            <div class="col-8">
+                                <div class="input-group">
+                                    <input id="search" type="text" name="query" class="form-control border-primary-subtle"
+                                        placeholder="Filter by searching. Example; model=tb2" title="Enter search keyword">
+                                    <button id="btnSearch" class="btn btn-outline-dark" type="button"
+                                        title="Search"><i class="bi bi-search"></i></button>
+                                </div>
+                                <div class="my-2">
+                                    <h6>{{_("Example Searches")}}</h6>
+                                    <ul>
+                                        <li><code>model=akinci</code></li>
+                                        <li><code>model=akinci brand=baykar</code></li>
+                                        <li><code>from=2024-01-01 to=2024-02-06</code></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="datatable-container">
+                            <table class="table datatable datatable-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sortable="true" aria-sort="descending" class="datatable-descending">
+                                            {{_("Model")}}
+                                        </th>
+                                        <th data-sortable="true">
+                                            {{_("Brand")}}
+                                        </th>
+                                        <th data-sortable="true">
+                                            {{_("Weight")}}
+                                        </th>
+                                        <th data-format="YYYY/DD/MM" data-sortable="true" data-type="date">
+                                            {{_("Rented Date")}}
+                                        </th>
+                                        <th >
+                                            {{_("Rented By")}}
+                                        </th>
+                                        <th data-sortable="false" class="red">
+                                            #
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyRentingResponse"> </tbody>
+                            </table>
+                        </div>
+                        <div class="datatable-bottom">
+                            <div id="datatableInfo" class="datatable-info">
+                                Showing 0 to 0 of 0 entries
+                            </div>
+                            <nav class="datatable-pagination">
+                                
+                            </nav>
+                        </div>
+                    </div>
+                    <!-- End Table with stripped rows -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<script>
+    var count = 0;
+    var total_pages = 0;
+    var current_page = 1;
+    var next = null;
+    var previous = null;
+
+    const datatableInfo = document.getElementById("datatableInfo");
+    const selectElement = document.getElementById("limitPerPage");
+    const searchInput = document.getElementById("search");
+    const btnSearch = document.getElementById("btnSearch");
+
+    var pageNumber = 1;
+    var limit = parseInt(selectElement.value);
+    var searchParams = '';
+    
+    
+    function getURL() {
+        const url = "{% url 'api:routers:renting-list'  %}";
+        const httpParams = `limit=${limit}&page=${pageNumber}&${searchParams}`;
+        return `${url}?${httpParams}`;
+    }
+
+
+    async function fetchDataAndCreateRow(url) {
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("Error:", data);
+                return; // Handle error here (e.g., display an error message)
+            }
+            // console.log("success data:::", data);
+            const tbody = document.getElementById("tbodyRentingResponse");
+            // empty inner HTML
+            tbody.innerHTML = "";
+            if (data) {
+                const results = data.results;
+                count = data.count;
+                total_pages = data.total_pages;
+                current_page = data.current_page;
+                next = data.next;
+                previous = data.previous;
+                const limit = parseInt(parseInt(count) / parseInt(total_pages));
+
+                datatableInfo.innerHTML = `Showing ${current_page} to ${limit} of ${count} Entries`
+
+                results.map((res) => {
+                    const tableRow = createTableRow(res);
+                    tbody.appendChild(tableRow);
+                });
+
+
+                // create pagination buttons
+                createPagination(data);
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    }
+
+    function createTableRow(data) {
+        const tableRow = document.createElement("tr");
+        tableRow.dataset.index = 0; // Assuming index is always 0 in your example
+
+        const tableCellModel = document.createElement("td");
+        tableCellModel.textContent = data.uav.model || ""; // 
+        const tableCellBrand = document.createElement("td");
+        tableCellBrand.textContent = data.uav.brand || ""; // 
+        const tableCellWeight = document.createElement("td");
+        tableCellWeight.textContent = data.uav.weight || ""; // 
+        const tableCellCreatedDate = document.createElement("td");
+        tableCellCreatedDate.textContent = data.created_date || ""; // 
+        const tableCellRentedBy = document.createElement("td");
+        tableCellRentedBy.textContent = data.user_name || ""; // 
+
+        const tableCellGreen = document.createElement("td");
+        tableCellGreen.textContent = data.id || "id"; // 
+        tableCellGreen.classList.add("green");
+
+        tableRow.appendChild(tableCellModel);
+        tableRow.appendChild(tableCellBrand);
+        tableRow.appendChild(tableCellWeight);
+        tableRow.appendChild(tableCellCreatedDate);
+        tableRow.appendChild(tableCellRentedBy);
+        tableRow.appendChild(tableCellGreen);
+
+        return tableRow;
+    }
+
+    function createPagination(data) {
+        const paginationContainer = document.querySelector(".datatable-pagination");
+        paginationContainer.innerHTML = ""; // Clear existing content
+
+        const ul = document.createElement("ul");
+        ul.classList.add("datatable-pagination-list");
+
+        // Previous button (disabled if no previous page)
+        const prevListItem = document.createElement("li");
+        prevListItem.classList.add("datatable-pagination-list-item");
+        if (!data.previous) {
+            prevListItem.classList.add("datatable-hidden", "datatable-disabled");
+        }
+        const prevButton = document.createElement("button");
+        prevButton.classList.add("datatable-pagination-list-item-link");
+        prevButton.dataset.page = data.current_page - 1; // Assuming previous page is current - 1
+        prevButton.textContent = "‹"; // Previous icon
+        prevButton.addEventListener("click", handlePageChange);
+        prevListItem.appendChild(prevButton);
+        ul.appendChild(prevListItem);
+
+        // Page buttons
+        const totalPages = data.total_pages;
+        const currentPage = data.current_page;
+        const visiblePages = 5; // Number of page buttons to display
+
+        let startIndex = Math.max(Math.min(currentPage - Math.floor(visiblePages / 2), totalPages - visiblePages + 1), 1);
+        let endIndex = Math.min(startIndex + visiblePages - 1, totalPages);
+
+        for (let i = startIndex; i <= endIndex; i++) {
+            const listItem = document.createElement("li");
+            listItem.classList.add("datatable-pagination-list-item");
+            if (i === currentPage) {
+                listItem.classList.add("datatable-active");
+            }
+            const button = document.createElement("button");
+            button.classList.add("datatable-pagination-list-item-link");
+            button.dataset.page = i;
+            button.textContent = i;
+            button.addEventListener("click", handlePageChange);
+            listItem.appendChild(button);
+            ul.appendChild(listItem);
+        }
+
+        // Ellipsis (if needed)
+        if (startIndex > 2 && endIndex < totalPages - 1) {
+            const ellipsisItem = document.createElement("li");
+            ellipsisItem.classList.add("datatable-pagination-list-item", "datatable-ellipsis", "datatable-disabled");
+            const ellipsisButton = document.createElement("button");
+            ellipsisButton.classList.add("datatable-pagination-list-item-link");
+            ellipsisButton.textContent = "…";
+            ellipsisItem.appendChild(ellipsisButton);
+            ul.appendChild(ellipsisItem);
+        }
+
+        // Next button (disabled if no next page)
+        const nextListItem = document.createElement("li");
+        nextListItem.classList.add("datatable-pagination-list-item");
+        if (!data.next) {
+            nextListItem.classList.add("datatable-hidden", "datatable-disabled");
+        }
+        const nextButton = document.createElement("button");
+        nextButton.classList.add("datatable-pagination-list-item-link");
+        nextButton.dataset.page = data.current_page + 1; // Assuming next page is current + 1
+        nextButton.textContent = "›"; // Next icon
+        nextButton.addEventListener("click", handlePageChange);
+        nextListItem.appendChild(nextButton);
+        ul.appendChild(nextListItem);
+
+        paginationContainer.appendChild(ul);
+    }
+
+    function handlePageChange(event) {
+        const clickedButton = event.target;
+        pageNumber = clickedButton.dataset.page;
+        // Fetch data for the clicked page here (using pageNumber)
+        // Update table content and potentially re-create pagination based on new data
+        fetchDataAndCreateRow(getURL());
+
+
+    }
+
+    function handleEntriesChange(event) {
+        limit = parseInt(event.target.value);
+        // To prevent api 404 error.
+        if (limit > count) {
+            pageNumber = 1;
+        }
+        fetchDataAndCreateRow(getURL());
+
+    }
+
+    function handleSearch() {
+        const searchTerm = searchInput.value.trim();
+
+        if (!searchTerm) {
+            return; // No search term, skip building query params
+        }
+
+        const arr_params = []; // Array to store query parameters
+
+        // Parse search terms (modify this logic based on your specific search criteria)
+        const searchTerms = searchTerm.split(/\s+/); // Split by whitespace
+        for (const term of searchTerms) {
+            const [key, value] = term.split("="); // Split by = sign for key-value pairs
+            if (key === "model") {
+                arr_params.push(`model=${value}`);
+            }
+            else if (key === "brand") {
+                arr_params.push(`brand=${value}`);
+            }
+            else if (key === "to") {
+                arr_params.push(`created_date_before=${value}`);  // Use lte for before comparison
+            }
+            else if (key === "from") {
+                arr_params.push(`created_date_after=${value}`);  // Use lte for before comparison
+            }
+            else {
+                // Add logic for other search criteria (e.g., handle OR conditions)
+                console.warn(`Unsupported search term: ${key}`);
+            }
+        }
+
+        // To prevent api 404 error.
+        if (arr_params) {
+            pageNumber = 1;
+            limit = 4;
+        }
+        searchParams = arr_params.join("&") // Join query params with &
+
+        // Update URL using getURL function
+        const url = getURL();
+        // console.log("Updated URL with search:", url);
+        fetchDataAndCreateRow(url);
+
+    }
+
+    // event listeners
+    selectElement.addEventListener("change", handleEntriesChange);
+    btnSearch.addEventListener("click", handleSearch);
+
+    // initial
+    fetchDataAndCreateRow(getURL());
+
+
+</script>

@@ -1,0 +1,47 @@
+{% extends 'home/base.html' %}
+{% load i18n %}
+
+{% block home_body %}
+<style>
+    span.emphasized-word {
+        border-radius: 30px 5px 30px 5px;
+        background-color: rgb(255, 166, 0);
+        color: black;
+        padding: 8px;
+        box-shadow: 0 3px 7px 1px rgba(69, 42, 1, 0.8);
+    }
+
+    @media only screen and (max-width: 600px) {
+        span.emphasized-word {
+            box-shadow: 0 1px 3px 1px rgba(69, 42, 1, 0.8);
+            margin-bottom: 5px;
+        }
+    }
+</style>
+<div class="container-fluid my-4">
+    <section id="hero" class="d-flex align-items-center my-4">
+        <div class="container text-center">
+            <div class="mt-2 mb-4">
+                <i class="fa-solid fa-jet-fighter fa-beat text-dark fs-1 m-1"
+                    style="--fa-animation-duration: 3s; --fa-animation-iteration-count: 10;"></i>
+                <i class="fa-solid fa-plane fa-fade text-dark fs-1 m-1"
+                    style="--fa-animation-duration: 3s; --fa-animation-iteration-count: 10;"></i>
+                <i class="fa-solid fa-jet-fighter-up fa-bounce text-dark fs-1 m-1"
+                    style="--fa-animation-duration: 3s; --fa-animation-iteration-count: 10;"></i>
+            </div>
+            {% get_current_language as LANGUAGE_CODE %}
+            {% if LANGUAGE_CODE == "en" %}
+            <h1 class="display-1 fw-bold">
+                <span class="emphasized-word px-3">Rent UAV</span>
+            </h1>
+            <h2 class="display-5 my-sm-2">Best UAV Supplier!</h2>
+            {% elif LANGUAGE_CODE == "tr" %}
+            <h1 class="display-1 fw-bold">
+                <span class="emphasized-word">IHA Kiralayın</span>
+            </h1>
+            <h2 class="display-5 my-sm-2">En iyi IHA Tedarikçisi</h2>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock home_body %}

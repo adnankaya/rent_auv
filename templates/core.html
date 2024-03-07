@@ -1,0 +1,71 @@
+{% load django_htmx %}
+{% load static %}
+{% load i18n %}
+{% load core_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block head_title %}
+        {% if title %}
+        {{title}}
+        {% else %}
+        {{_("Rent UAV")}}
+        {% endif %}
+        {% endblock head_title %}
+    </title>
+    {% block extra_head %}
+    {% endblock extra_head %}
+    <!-- CSS libraries -->
+    {% include "libs-css.html" %}
+</head>
+
+<body hx-ext="debug, event-header">
+    <header>
+        {% block core_header%}
+        {% include 'header.html' %}
+        {% endblock core_header%}
+    </header>
+    <main class="container-fluid">
+        <div class="core-body">
+            {% block body%}
+            <div class="row">
+                <div class="col-10 mx-auto">
+                    {% include "messages.html" %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-10 mx-auto">
+                    {% include "messages-form-errors.html" %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    {% block content %}
+                    {% endblock content %}
+                </div>
+            </div>
+            {% endblock body%}
+            <div class="row">
+                <div class="col">
+                    {% block extra_body %}
+                    {% endblock extra_body %}
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="my-md-5 pt-md-5">
+        {% block core_footer%}
+        {% include 'footer.html' %}
+        {% endblock core_footer%}
+    </footer>
+    <!-- JS libraries -->
+    {% include "libs-js.html" %}
+    {% django_htmx_script %}
+</body>
+
+</html>

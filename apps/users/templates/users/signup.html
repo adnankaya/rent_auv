@@ -1,0 +1,46 @@
+{% extends 'users/base.html' %}
+{% load i18n %}
+
+
+{% block users_body %}
+<div class="row mt-4">
+    <div class="col-md-6 mx-auto">
+        <div class="card p-4 m-2 p-0 shadow">
+            <form method="post">
+                {% csrf_token %}
+                <h1 class="h3 mb-3 fw-normal">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    {{_("Sign Up")}}
+                </h1>
+                <div class="form-floating mb-2">
+                    <input name="username" value="{{username}}" type="text" class="form-control" id="idUsername"
+                        placeholder="username" required>
+                    <label for="idUsername">{{_("Username")}}</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input name="email" value="{{email}}" type="email" class="form-control" id="idEmail"
+                        placeholder="email" required>
+                    <label for="idEmail">{{_("Email")}}</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input name="password1" type="password" class="form-control" id="idPassword1"
+                        placeholder="Password">
+                    <label for="idPassword1">{{_("Password")}}</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input name="password2" type="password" class="form-control" id="idPassword2"
+                        placeholder="Password Confirm">
+                    <label for="idPassword2">{{_("Password Confirm")}}</label>
+                </div>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button class="btn btn-primary mt-4" type="submit">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        {{_("Sign Up")}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock users_body %}

@@ -1,0 +1,13 @@
+{% load static %}
+
+<!-- fontawesome -->
+<link rel="stylesheet" href="{% static 'libs/node_modules/@fortawesome/fontawesome-free/css/all.min.css' %}"/>
+<!-- bootstrap -->
+<link rel="stylesheet" href="{% static 'libs/node_modules/bootstrap/dist/css/bootstrap.min.css' %}">
+<!-- icons -->
+<link rel="stylesheet" href="{% static 'libs/node_modules/bootstrap-icons/font/bootstrap-icons.min.css' %}">
+<!-- simple datatable css -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.0/dist/style.min.css">
+<!-- Project CSS -->
+{% now "Y-m-d" as version %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v={{version}}">

@@ -1,0 +1,14 @@
+{% extends 'home/dashboard/base.html' %}
+
+{% block scraping_body%}
+
+<main>
+    <div class="row">
+        <div class="col">
+            {% include "uav/components/rentings-datatable.html" %}
+
+        </div>
+    </div>
+</main>
+
+{% endblock scraping_body%}
